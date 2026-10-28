@@ -1,0 +1,10 @@
+{
+  "name": "keepwell",
+  "version": "0.0.1",
+  "description": "The records layer for agents. Placeholder, first release coming spring 2027.",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/keepwell-dev/keepwell",
+  "files": [
+    "README.md"
+  ]
+}
