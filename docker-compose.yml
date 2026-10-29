@@ -1,0 +1,21 @@
+# Local Postgres for development, the integration tests and the demo.
+# Start it with `docker compose up -d`. Set KEEPWELL_PG_PORT if port 5432 is taken.
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: keepwell
+      POSTGRES_PASSWORD: keepwell
+      POSTGRES_DB: keepwell
+    ports:
+      - "127.0.0.1:${KEEPWELL_PG_PORT:-5432}:5432"
+    volumes:
+      - keepwell-postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keepwell -d keepwell"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  keepwell-postgres:
