@@ -3,8 +3,47 @@
   "version": "0.0.1",
   "description": "The records layer for agents. Placeholder, first release coming spring 2027.",
   "license": "Apache-2.0",
-  "repository": "https://github.com/keepwell-dev/keepwell",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/keepwell-dev/keepwell.git"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./spec/*.json": "./spec/*.json",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "keepwell": "dist/cli/src/bin.js"
+  },
   "files": [
-    "README.md"
-  ]
+    "dist",
+    "spec",
+    "skills",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "node -e \"fs.rmSync('dist', { recursive: true, force: true })\" && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test \"packages/*/test/**/*.test.ts\"",
+    "test:integration": "node --test \"test/integration/**/*.test.ts\"",
+    "check": "node scripts/check-deps.ts && node scripts/check-imports.ts && node scripts/check-words.ts && node scripts/check-file-length.ts",
+    "check:pack": "node scripts/check-pack.ts",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "@types/pg": "8.23.1",
+    "typescript": "7.0.2"
+  }
 }
