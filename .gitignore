@@ -147,3 +147,7 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Private project brief: never committed
+CLAUDE.md
+CLAUDE.local.md
