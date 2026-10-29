@@ -1,0 +1,74 @@
+# CI: typecheck, unit tests, project checks and the package check, then integration tests on Postgres 15 to 18.
+# Actions are pinned to commit hashes; the comment names the release.
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Typecheck, unit tests and checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Install
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit tests
+        run: npm test
+      - name: Dependencies, import boundaries, banned words, file length
+        run: npm run check
+      - name: Package installs and runs
+        run: npm run check:pack
+
+  integration:
+    name: Integration tests (Postgres ${{ matrix.postgres }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        postgres: ["15", "16", "17", "18"]
+    services:
+      postgres:
+        image: postgres:${{ matrix.postgres }}
+        env:
+          POSTGRES_USER: keepwell
+          POSTGRES_PASSWORD: keepwell
+          POSTGRES_DB: keepwell
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U keepwell -d keepwell"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 30
+    env:
+      DATABASE_URL_TEST: postgres://keepwell:keepwell@localhost:5432/keepwell
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Install
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Integration tests
+        run: npm run test:integration
